@@ -46,13 +46,11 @@ router.get('/autocomplete',  async (req, res) => {
 
         {$search: {index: "autocomplete-text", autocomplete: {query: req.query.t, path: "title" }}},
 
-        {$limit: 20},
-
-        {$project: {_id: 0,title: 1}}
+        {$limit: 20}
 
     ];
     // run pipeline
-      const result = await Movies.aggregate(agg);
+      const result = await Movies.aggregate(agg).limit(7);
       res.json(result);
     } catch (error) {
         console.log(error.message);
