@@ -39,4 +39,25 @@ router.get('/search',  async (req, res) => {
     }
 })
 
+router.get('/autocomplete',  async (req, res) => {
+    try {
+        
+      const agg = [
+
+        {$search: {index: "autocomplete-text", autocomplete: {query: req.query.t, path: "title" }}},
+
+        {$limit: 20},
+
+        {$project: {_id: 0,title: 1}}
+
+    ];
+    // run pipeline
+      const result = await Movies.aggregate(agg);
+      res.json(result);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send("Internal Server Error");
+    }
+})
+
 export default router;
