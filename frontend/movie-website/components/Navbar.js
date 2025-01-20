@@ -1,37 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import MovieListItem from "./MovieListItem";
 import { SearchBar } from "./SearchBar";
 
 export default function Navbar() {
-  const host = "http://localhost:5000/";
-  const [Movies, setMovies] = useState([]);
+  // const host = "http://localhost:5000/";
+  // const [Movies, setMovies] = useState([]);
 
-  const handleMovieName = async (e) => {
-    // if (!e.target.value) {
-    //   setMovies([]); // Clear the state
-    //   return;
-    // }
+  // const handleMovieName = async (e) => {
+  //   // if (!e.target.value) {
+  //   //   setMovies([]); // Clear the state
+  //   //   return;
+  //   // }
 
-    const response = await fetch(
-      `${host}api/movies/autocomplete?t=${e.target.value}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // "auth-token": localStorage.getItem('token')
-        },
-      }
-    );
-    const json = await response.json(); //Parsing the json
-    console.log(json);
-    setMovies(json);
-  };
+  //   const response = await fetch(
+  //     `${host}api/movies/autocomplete?t=${e.target.value}`,
+  //     {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         // "auth-token": localStorage.getItem('token')
+  //       },
+  //     }
+  //   );
+  //   const json = await response.json(); //Parsing the json
+  //   console.log(json);
+  //   setMovies(json);
+  // };
 
-  const getMovies = async () => {
-    //API Call
-  };
+  // const getMovies = async () => {
+  //   //API Call
+  // };
   return (
     <header className="text-gray-400 bg-gray-900 body-font">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">

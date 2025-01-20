@@ -19,6 +19,9 @@ import {
 import { Button } from '@/components/ui/button';
 
 export function SearchBar() {
+
+  const host = "http://localhost:5000/";
+
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(""); // Stores the selected movie title
   const [movies, setMovies] = React.useState([]); // Stores fetched movie data
@@ -31,10 +34,12 @@ export function SearchBar() {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://www.omdbapi.com/?s=${query}&apikey=d2af6d5c`
+      `${host}api/movies/autocomplete?t=${query}`,
       );
       const data = await response.json();
-      setMovies(data.Search || []); // Use `Search` field in the OMDB response
+      // console.log(data)
+      
+      setMovies(data || []); // Use `Search` field in the OMDB response
     } catch (error) {
       console.error("Error fetching data:", error);
       setMovies([]);
@@ -93,35 +98,33 @@ export function SearchBar() {
               <CommandEmpty>Loading...</CommandEmpty>
             ) : movies.length > 0 ? (
               <CommandGroup>
-                {movies.map((movie) => (
+                {movies.map((movie,index) => (
                   <CommandItem
-                    key={movie.imdbID}
+                    key={index}
                     onSelect={() => {
-                      setValue(movie.Title); // Set the selected movie title
+                      setValue(movie.title); // Set the selected movie title
                       setOpen(false); // Close the popover
                     }}
                   >
                     <div className="flex items-center gap-3">
                       <img
                         src={
-                          movie.Poster !== "N/A"
-                            ? movie.Poster
-                            : "https://via.placeholder.com/50x70"
+                          movie.poster
                         }
-                        alt={movie.Title}
+                        alt={movie.title}
                         className="h-12 w-8 object-cover rounded"
                       />
                       <div>
-                        <p className="text-sm font-medium">{movie.Title}</p>
+                        <p className="text-sm font-medium">{movie.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {movie.Year}
+                          {movie.year}
                         </p>
                       </div>
                     </div>
                     <Check
                       className={cn(
                         "ml-auto",
-                        value === movie.Title ? "opacity-100" : "opacity-0"
+                        value === movie.title ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>
