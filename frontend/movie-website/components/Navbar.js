@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import MovieListItem from "./MovieListItem";
-import { ComboboxDemo } from "./SearchBar/combo";
+import { ComboboxDemo } from "./SearchBar";
 
 export default function Navbar() {
   const host = "http://localhost:5000/";
