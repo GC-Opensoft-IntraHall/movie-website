@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import MovieListItem from "./MovieListItem";
-import { ComboboxDemo } from "./SearchBar";
+import { SearchBar } from "./SearchBar";
 
 export default function Navbar() {
   const host = "http://localhost:5000/";
@@ -51,7 +51,7 @@ export default function Navbar() {
           <span className="ml-3 text-xl">JungliMoviez</span>
         </a>
         <div className="md:ml-auto md:mr-auto flex flex-wrap items-center text-base justify-center relative">
-          <ComboboxDemo />
+          <SearchBar />
           {/* <input
             type="text"
             placeholder="Search..."

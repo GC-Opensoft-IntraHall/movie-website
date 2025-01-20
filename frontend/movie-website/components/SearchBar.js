@@ -16,9 +16,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@material-tailwind/react";
+import { Button } from '@/components/ui/button';
 
-export function ComboboxDemo() {
+export function SearchBar() {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(""); // Stores the selected movie title
   const [movies, setMovies] = React.useState([]); // Stores fetched movie data
