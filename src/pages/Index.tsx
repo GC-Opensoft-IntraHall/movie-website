@@ -9,21 +9,26 @@ import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 export default function Index() {
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
   const [allMovies, setAllMovies] = useState(mockMovies);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const nextMovie = () => {
+    setIsTransitioning(true);
     setCurrentMovieIndex((prev) => (prev + 1) % mockMovies.length);
+    setTimeout(() => setIsTransitioning(false), 500);
   };
 
   const previousMovie = () => {
+    setIsTransitioning(true);
     setCurrentMovieIndex((prev) => 
       prev === 0 ? mockMovies.length - 1 : prev - 1
     );
+    setTimeout(() => setIsTransitioning(false), 500);
   };
 
   useEffect(() => {
     const interval = setInterval(() => {
       nextMovie();
-    }, 5000); // Change slide every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -53,11 +58,13 @@ export default function Index() {
       <Navbar />
       
       {/* Hero Section */}
-      <div className="relative h-[80vh] w-full group">
+      <div className="relative h-[80vh] w-full overflow-hidden">
         <img
           src={featuredMovie.poster}
           alt={featuredMovie.title}
-          className="w-full h-full object-cover transition-opacity duration-500"
+          className={`w-full h-full object-cover transition-all duration-700 ${
+            isTransitioning ? 'scale-105 opacity-70' : 'scale-100 opacity-100'
+          }`}
         />
         <div className="hero-gradient" />
         <div className="absolute bottom-0 left-0 p-8 w-full">
@@ -69,28 +76,30 @@ export default function Index() {
               {featuredMovie.description}
             </p>
             <Button size="lg" className="gap-2 animate-fade-in">
-              <Play className="h-5 w-5" /> Play Now
+              <Play className="h-5 w-5" /> Watch Now
             </Button>
           </div>
         </div>
 
         {/* Navigation Buttons */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={previousMovie}
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={nextMovie}
-        >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
+        <div className="absolute bottom-8 right-8 flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-colors"
+            onClick={previousMovie}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-full bg-black/20 backdrop-blur-sm hover:bg-black/40 transition-colors"
+            onClick={nextMovie}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        </div>
       </div>
 
       {/* Category Carousels */}
