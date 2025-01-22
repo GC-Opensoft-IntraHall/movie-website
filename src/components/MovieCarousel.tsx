@@ -1,14 +1,18 @@
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "./ui/button";
 import MovieCard from "./MovieCard";
 
 interface MovieCarouselProps {
   title: string;
-  movies: any[];
+  movies?: Array<{
+    id: string;
+    title: string;
+    poster: string;
+    year: string;
+  }>;
 }
 
-export default function MovieCarousel({ title, movies }: MovieCarouselProps) {
+export default function MovieCarousel({ title, movies = [] }: MovieCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -22,19 +26,26 @@ export default function MovieCarousel({ title, movies }: MovieCarouselProps) {
     }
   };
 
+  if (!movies.length) {
+    return null;
+  }
+
   return (
     <div className="relative py-8">
       <h2 className="text-2xl font-semibold mb-4 px-4">{title}</h2>
       
       <div className="group relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+        <button
           onClick={() => scroll("left")}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+                   w-12 h-32 flex items-center justify-center
+                   bg-black/50 hover:bg-black/70
+                   opacity-0 group-hover:opacity-100 
+                   transition-all duration-300
+                   rounded-r-lg"
         >
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
+          <ChevronLeft className="h-8 w-8 text-white" />
+        </button>
 
         <div
           ref={scrollRef}
@@ -47,14 +58,17 @@ export default function MovieCarousel({ title, movies }: MovieCarouselProps) {
           ))}
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+        <button
           onClick={() => scroll("right")}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+                   w-12 h-32 flex items-center justify-center
+                   bg-black/50 hover:bg-black/70
+                   opacity-0 group-hover:opacity-100 
+                   transition-all duration-300
+                   rounded-l-lg"
         >
-          <ChevronRight className="h-6 w-6" />
-        </Button>
+          <ChevronRight className="h-8 w-8 text-white" />
+        </button>
       </div>
     </div>
   );

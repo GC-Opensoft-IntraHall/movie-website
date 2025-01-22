@@ -2,7 +2,7 @@ export const mockMovies = [
   {
     id: "1",
     title: "Inception",
-    poster: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05",
+    poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
     year: "2010",
     category: "Sci-Fi",
     description: "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
@@ -18,7 +18,7 @@ export const mockMovies = [
   {
     id: "3",
     title: "Interstellar",
-    poster: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5",
+    poster: "https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_SX300.jpg",
     year: "2014",
     category: "Sci-Fi",
     description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
