@@ -12,6 +12,9 @@ interface SearchResult {
 }
 
 export default function SearchBar({ onClose }: { onClose: () => void }) {
+
+  const host = "http://localhost:5000/";
+
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -36,14 +39,35 @@ export default function SearchBar({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
+  const handleMovieName = async (query) => {
+    // if (!e.target.value) {
+    //   setMovies([]); // Clear the state
+    //   return;
+    // }
+
+    const response = await fetch(
+      `${host}api/movies/autocomplete?t=${query}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          // "auth-token": localStorage.getItem('token')
+        },
+      }
+    );
+    const json = await response.json(); //Parsing the json
+    console.log(json);
+    setSuggestions(json);
+  };
   useEffect(() => {
     if (query.length > 1) {
-      const filtered = mockMovies
-        .filter(movie => 
-          movie.title.toLowerCase().includes(query.toLowerCase())
-        )
-        .slice(0, 6);
-      setSuggestions(filtered);
+      // const filtered = mockMovies
+      //   .filter(movie => 
+      //     movie.title.toLowerCase().includes(query.toLowerCase())
+      //   )
+      //   .slice(0, 6);
+      // setSuggestions(filtered);
+      handleMovieName(query);
     } else {
       setSuggestions([]);
     }

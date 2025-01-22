@@ -7,8 +7,8 @@ import { mockMovies } from "../data/mockData";
 export default function Search() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const [results, setResults] = useState<any[]>([]);
-  const [similar, setSimilar] = useState<any[]>([]);
+  const [results, setResults] = useState([]);
+  const [similar, setSimilar] = useState([]);
 
   useEffect(() => {
     // Simulate search results
