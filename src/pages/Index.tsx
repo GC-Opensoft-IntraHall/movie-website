@@ -1,32 +1,102 @@
 import { useEffect, useState, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import MovieCarousel from "../components/MovieCarousel";
-import { mockMovies, categories } from "../data/mockData";
+import { categories } from "../data/mockData";
 import { Play, Info, Volume2, VolumeX } from "lucide-react";
 import MovieCard from "@/components/MovieCard";
 
+const API_KEY = 'd2af6d5c';
+const MOVIES_PER_PAGE = 10;
+
 export default function Index() {
+  const [movies, setMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('movie'); // Default search term
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
-  const [allMovies, setAllMovies] = useState(mockMovies);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
 
+  const fetchMovies = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+  
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `http://www.omdbapi.com/?apikey=${API_KEY}&s=${searchTerm}&page=${page}&type=movie`
+      );
+      const data = await response.json();
+  
+      if (data.Response === 'True') {
+        const newMovies = data.Search.map(movie => ({
+          id: movie.imdbID,
+          title: movie.Title,
+          year: movie.Year,
+          poster: movie.Poster !== 'N/A' ? movie.Poster : '/placeholder.jpg'
+        }));
+  
+        // Filter out duplicate movies
+        setMovies(prev => {
+          const existingIds = new Set(prev.map(movie => movie.id));
+          const uniqueMovies = newMovies.filter(movie => !existingIds.has(movie.id));
+          return [...prev, ...uniqueMovies];
+        });
+  
+        setHasMore(page * MOVIES_PER_PAGE < parseInt(data.totalResults));
+        setPage(prev => prev + 1);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, searchTerm, isLoading, hasMore]);
+  
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const threshold = document.documentElement.offsetHeight - 800;
+      if (window.innerHeight + window.scrollY > threshold) {
+        fetchMovies();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [fetchMovies]);
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
+  const MovieCardSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="bg-gray-700 rounded-lg aspect-[2/3]" />
+      <div className="space-y-2 mt-2">
+        <div className="bg-gray-700 h-4 rounded w-3/4" />
+        <div className="bg-gray-700 h-3 rounded w-1/2" />
+      </div>
+    </div>
+  );
+
+  const featuredMovie = movies[currentMovieIndex] || {
+    poster: "/placeholder.jpg",
+    title: "Sample Movie",
+    description: "An epic adventure that will keep you on the edge of your seat.",
+    year: "2023",
+  };
+
   const nextMovie = useCallback(() => {
     if (!isAutoplayPaused) {
       setIsTransitioning(true);
-      setCurrentMovieIndex((prev) => (prev + 1) % mockMovies.length);
+      setCurrentMovieIndex((prev) => (prev + 1) % movies.length);
       setTimeout(() => setIsTransitioning(false), 500);
     }
-  }, [isAutoplayPaused]);
-
-  const previousMovie = useCallback(() => {
-    setIsTransitioning(true);
-    setCurrentMovieIndex((prev) => 
-      prev === 0 ? mockMovies.length - 1 : prev - 1
-    );
-    setTimeout(() => setIsTransitioning(false), 500);
-  }, []);
+  }, [isAutoplayPaused, movies.length]);
 
   useEffect(() => {
     if (!isAutoplayPaused) {
@@ -35,33 +105,12 @@ export default function Index() {
     }
   }, [nextMovie, isAutoplayPaused]);
 
-  const loadMore = useCallback(() => {
-    setAllMovies(prev => [...prev, ...mockMovies]);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (
-        window.innerHeight + document.documentElement.scrollTop + 100
-        >= document.documentElement.offsetHeight
-      ) {
-        loadMore();
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadMore]);
-
-  const featuredMovie = mockMovies[currentMovieIndex];
-
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
-      
+
       {/* Hero Section */}
       <div className="relative h-[85vh] w-full overflow-hidden">
-        {/* Background Image/Video */}
         <div className="absolute inset-0">
           <img
             src={featuredMovie.poster}
@@ -73,10 +122,8 @@ export default function Index() {
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
 
-        {/* Content */}
         <div className="absolute bottom-0 left-0 w-full p-8 md:p-16">
           <div className="max-w-2xl space-y-4">
-            {/* Title & Rating */}
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <span className="rounded bg-white/20 px-2 py-1 text-sm font-medium backdrop-blur-sm">
@@ -91,13 +138,9 @@ export default function Index() {
                 {featuredMovie.title}
               </h1>
             </div>
-
-            {/* Description */}
             <p className="text-lg text-gray-300 animate-fade-in line-clamp-3">
-              {featuredMovie.description || "An epic adventure that will keep you on the edge of your seat."}
+              {featuredMovie.description}
             </p>
-
-            {/* Buttons */}
             <div className="flex items-center gap-4 animate-fade-in">
               <button className="flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-semibold text-black transition-colors hover:bg-white/90">
                 <Play className="h-5 w-5" /> Play Now
@@ -108,51 +151,39 @@ export default function Index() {
             </div>
           </div>
         </div>
-
-        {/* Controls */}
-        <div className="absolute bottom-8 right-8 flex items-center gap-4">
-          <button
-            onClick={() => setIsAutoplayPaused(!isAutoplayPaused)}
-            className="rounded-full bg-black/50 p-3 backdrop-blur-sm transition-colors hover:bg-white/20"
-          >
-            {isAutoplayPaused ? (
-              <Play className="h-5 w-5" />
-            ) : (
-              <span className="h-5 w-5 rounded-sm bg-white" />
-            )}
-          </button>
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="rounded-full bg-black/50 p-3 backdrop-blur-sm transition-colors hover:bg-white/20"
-          >
-            {isMuted ? (
-              <VolumeX className="h-5 w-5" />
-            ) : (
-              <Volume2 className="h-5 w-5" />
-            )}
-          </button>
-        </div>
       </div>
+
+    
 
       {/* Category Carousels */}
       <div className="relative -mt-8 py-8 z-10">
         {categories.map((category) => (
-          <MovieCarousel
-            key={category}
-            title={category}
-            movies={mockMovies}
-          />
+          <MovieCarousel key={category} title={category} movies={movies} />
         ))}
       </div>
-
-      {/* Trending Now Section */}
-      <div className="px-4 py-9 md:px-16">
+        {/* Movie Grid */}
+        <div className="px-4 py-9 md:px-16">
         <h2 className="text-2xl font-semibold mb-6">Trending Now</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {allMovies.map((movie, index) => (
+          {movies.map((movie, index) => (
             <MovieCard key={`${movie.id}-${index}`} {...movie} />
           ))}
+          {isLoading && (
+            <>
+              {[...Array(MOVIES_PER_PAGE)].map((_, index) => (
+                <MovieCardSkeleton key={`skeleton-${index}`} />
+              ))}
+            </>
+          )}
         </div>
+        {isLoading && (
+          <div className="flex justify-center py-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white" />
+          </div>
+        )}
+        {!hasMore && !isLoading && (
+          <p className="text-center text-gray-500 mt-8">No more movies to load</p>
+        )}
       </div>
     </div>
   );

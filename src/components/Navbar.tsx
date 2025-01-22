@@ -12,7 +12,7 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-50 bg-gradient-to-b from-background to-background/0 px-4 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="text-2xl font-bold text-primary">
-          StreamFlix
+          Junglee.Moviez
         </Link>
         
         <div className="flex items-center gap-4">
