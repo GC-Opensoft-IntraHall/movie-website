@@ -28,8 +28,11 @@ export default function MovieCarousel({ category}: MovieCarouselProps) {
       }
     );
     const json = await response.json(); //Parsing the json
-    console.log(json);
-    setMovies(json);
+    const validMovies = json.filter(
+      (movie) => movie.poster && movie.poster !== "N/A" && movie.poster.endsWith(".jpg")
+    );
+    console.log(validMovies);
+    setMovies(validMovies);
   };
 
   useEffect(() => {

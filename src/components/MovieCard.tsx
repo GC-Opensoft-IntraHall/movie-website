@@ -20,6 +20,8 @@ export default function MovieCard({
   duration = "2h 30m",
   genres = ["Action", "Drama"]
 }: MovieCardProps) {
+
+  
   return (
     <Link 
       to={`/movie/${id}`} 
@@ -29,6 +31,11 @@ export default function MovieCard({
         <img 
           src={poster} 
           alt={title} 
+          onError={(e) => {
+            const img = e.target as HTMLImageElement; // Cast e.target to HTMLImageElement
+            img.onerror = null; // Prevent infinite loop
+            img.src = "https://m.media-amazon.com/images/M/MV5BMzgxODk1Mzk2Ml5BMl5BanBnXkFtZTgwMDg0NzkwMjE@._V1_SY1000_SX677_AL_.jpg"; // Fallback image path
+          }}
           className="aspect-[2/3] w-full object-cover transition-transform duration-300 group-hover:scale-110 group-hover:brightness-75"
         />
         
