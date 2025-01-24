@@ -47,7 +47,6 @@ router.get("/autocomplete", async (req, res) => {
           autocomplete: { query: req.query.t, path: "title" },
         },
       },
-
       { $limit: 20 },
     ];
     // run pipeline
@@ -97,6 +96,30 @@ router.get('/:id',  async (req, res) => {
     res.status(500).send("Internal Server Error");
 }
 })
+
+router.post('/fuzzy', async (req, res) => {
+  try {
+    const agg = [
+      {
+        $search: {
+          index: "autocomplete-text",
+          autocomplete: { query: req.query.t, path: "title" , fuzzy: {
+            maxEdits: 2,
+            prefixLength: 2,
+            maxExpansions: 50,
+          }, },
+        },
+      },
+      { $limit: 20 },
+    ];
+    // run pipeline
+    const result = await Movies.aggregate(agg).limit(7);
+    res.json(result);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 
 export default router;

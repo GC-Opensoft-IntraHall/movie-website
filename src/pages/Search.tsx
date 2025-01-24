@@ -10,19 +10,47 @@ export default function Search() {
   const [results, setResults] = useState([]);
   const [similar, setSimilar] = useState([]);
 
-  useEffect(() => {
-    // Simulate search results
-    const searchResults = mockMovies.filter(movie =>
-      movie.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setResults(searchResults);
+  const host = "http://localhost:5000/";
 
-    // Simulate similar suggestions based on category
-    const similarMovies = mockMovies.filter(movie =>
-      movie.category === searchResults[0]?.category &&
-      !searchResults.includes(movie)
+  const handleMovieName = async (query) => {
+    if (!query) {
+      setResults([]); // Clear the state
+      return;
+    }
+
+    const response = await fetch(
+      `${host}api/movies/fuzzy?t=${query}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // "auth-token": localStorage.getItem('token')
+        },
+      }
     );
-    setSimilar(similarMovies);
+    const json = await response.json(); //Parsing the json
+    console.log(json);
+    setResults(json);
+  };
+
+
+  useEffect(() => {
+    // // Simulate search results
+    // const searchResults = mockMovies.filter(movie =>
+    //   movie.title.toLowerCase().includes(query.toLowerCase())
+    // );
+    // setResults(searchResults);
+    // console.log(searchResults)
+    console.log(query)
+    handleMovieName(query);
+    // // Simulate similar suggestions based on category
+    // const similarMovies = mockMovies.filter(movie =>
+    //   movie.category === searchResults[0]?.category &&
+    //   !searchResults.includes(movie)
+    // );
+    // setSimilar(similarMovies);
+
+    
   }, [query]);
 
   return (
@@ -41,7 +69,7 @@ export default function Search() {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-12">
               {results.map((movie) => (
-                <MovieCard key={movie.id} {...movie} />
+                <MovieCard key={movie._id} {...movie} />
               ))}
             </div>
 
@@ -52,7 +80,7 @@ export default function Search() {
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {similar.map((movie) => (
-                    <MovieCard key={movie.id} {...movie} />
+                    <MovieCard key={movie._id} {...movie} />
                   ))}
                 </div>
               </>
