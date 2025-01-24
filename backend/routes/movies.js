@@ -85,4 +85,18 @@ router.get('/category',  async (req, res) => {
 }
 })
 
+//ROUTE 5:Search Movies by Id
+router.get('/:id',  async (req, res) => {
+  
+  try {
+        
+   let movie = await Movies.findById(req.params.id);
+   res.json(movie);
+} catch (error) {
+    console.log(error.message);
+    res.status(500).send("Internal Server Error");
+}
+})
+
+
 export default router;

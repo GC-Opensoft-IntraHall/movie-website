@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Play, Info, Heart, Plus } from "lucide-react";
 
 interface MovieCardProps {
-  id: string;
+  _id: string;
   title: string;
   poster: string;
   year: string;
@@ -12,7 +12,7 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ 
-  id, 
+  _id, 
   title, 
   poster, 
   year,
@@ -24,7 +24,7 @@ export default function MovieCard({
   
   return (
     <Link 
-      to={`/movie/${id}`} 
+      to={`/movie/${_id}`} 
       className="group relative block transition-transform duration-300 hover:scale-105"
     >
       <div className="relative overflow-hidden rounded-lg bg-gray-900">
