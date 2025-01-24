@@ -4,7 +4,7 @@ import { Search, X, Clock, TrendingUp } from "lucide-react";
 import { mockMovies } from "@/data/mockData";
 
 interface SearchResult {
-  id: string;
+  _id: string;
   title: string;
   poster: string;
   year: string;
@@ -61,12 +61,6 @@ export default function SearchBar({ onClose }: { onClose: () => void }) {
   };
   useEffect(() => {
     if (query.length > 1) {
-      // const filtered = mockMovies
-      //   .filter(movie => 
-      //     movie.title.toLowerCase().includes(query.toLowerCase())
-      //   )
-      //   .slice(0, 6);
-      // setSuggestions(filtered);
       handleMovieName(query);
     } else {
       setSuggestions([]);
@@ -106,7 +100,9 @@ export default function SearchBar({ onClose }: { onClose: () => void }) {
         e.preventDefault();
         if (selectedIndex >= 0) {
           const selected = suggestions[selectedIndex];
-          navigate(`/movie/${selected.id}`);
+          console.log("HI")
+          console.log(selected);
+          navigate(`/movie/${selected._id}`);
           onClose();
         } else {
           handleSearch();
@@ -150,8 +146,8 @@ export default function SearchBar({ onClose }: { onClose: () => void }) {
             <div className="p-2">
               {suggestions.map((movie, index) => (
                 <Link
-                  key={movie.id}
-                  to={`/movie/${movie.id}`}
+                  key={movie._id}
+                  to={`/movie/${movie._id}`}
                   className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
                     index === selectedIndex ? 'bg-white/20' : 'hover:bg-white/10'
                   }`}
