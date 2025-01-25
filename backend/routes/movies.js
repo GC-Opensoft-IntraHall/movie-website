@@ -102,11 +102,11 @@ router.post('/fuzzy', async (req, res) => {
     const agg = [
       {
         $search: {
-          index: "autocomplete-text",
-          autocomplete: { query: req.query.t, path: "title" , fuzzy: {
+          index: "fuzzy",
+          text: { query: req.query.t, path: "title" , fuzzy: {
             maxEdits: 2,
-            prefixLength: 2,
-            maxExpansions: 50,
+            prefixLength: 1,
+            maxExpansions: 10,
           }, },
         },
       },
