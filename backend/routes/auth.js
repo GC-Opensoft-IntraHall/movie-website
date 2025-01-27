@@ -55,7 +55,6 @@ router.get("/google/callback", async (req, res) => {
       JWT_SECRET,
       { expiresIn: "24h" }
     );
-    console.log(token);
 
     // Redirect to frontend with token
     res.redirect(`http://localhost:8080/auth/success?token=${token}`);

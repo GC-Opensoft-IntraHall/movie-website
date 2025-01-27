@@ -23,6 +23,18 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  likedMovies: [
+    {
+      movieId: { type: mongoose.Schema.Types.ObjectId, ref: "movies" },
+      addedAt: { type: Date, default: Date.now },
+    },
+  ],
+  watchLater: [
+    {
+      movieId: { type: mongoose.Schema.Types.ObjectId, ref: "movies" },
+      addedAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 export default mongoose.model("User", userSchema);
