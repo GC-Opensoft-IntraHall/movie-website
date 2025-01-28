@@ -74,6 +74,7 @@ export default function Movie() {
           <div className="grid md:grid-cols-[2fr,1fr] gap-8">
             <div>
               <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
+              <div className="flex gap-4 text-ml text-muted-foreground mb-6">{movie.plot}</div>
               <div className="flex gap-4 text-sm text-muted-foreground mb-6">
                 <span>{movie.year}</span>
                 <span>{movie.category}</span>

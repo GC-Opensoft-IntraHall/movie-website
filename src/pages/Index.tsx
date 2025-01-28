@@ -4,6 +4,8 @@ import MovieCarousel from "../components/MovieCarousel";
 import { Play, Info } from "lucide-react";
 import MovieCard from "@/components/MovieCard";
 
+const host = "http://localhost:5000/";
+
 export default function Index() {
   const categories = ["Horror", "Action", "Thriller","Comedy","Romance"];
 
@@ -36,6 +38,7 @@ export default function Index() {
   const [currentMovieIndex, setCurrentMovieIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
+  const [latestMovies, setLatestMovies] = useState([]);
 
   const featuredMovie = movies[currentMovieIndex] || {
     poster: "/placeholder.jpg",
@@ -43,6 +46,16 @@ export default function Index() {
     description: "An epic adventure that will keep you on the edge of your seat.",
     year: "2023",
   };
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      const [latest] = await Promise.all([
+        fetch(`${host}api/movies/latest`).then(res => res.json())
+      ]);
+      setLatestMovies(latest);
+    };
+    fetchMovies();
+  }, []);
 
   const nextMovie = useCallback(() => {
     if (!isAutoplayPaused) {
@@ -114,15 +127,25 @@ export default function Index() {
         ))}
       </div>
 
-      {/* Movie Grid */}
+      {/* Latest Movies */}
       <div className="px-4 py-9 md:px-16">
-        <h2 className="text-2xl font-semibold mb-6">Trending Now</h2>
+        <h2 className="text-2xl font-semibold mb-6">Latest Releases</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {movies.map((movie, index) => (
-            <MovieCard key={`${movie.id}-${index}`} {...movie} />
+          {latestMovies.map((movie) => (
+            <MovieCard key={movie._id} {...movie} />
           ))}
         </div>
       </div>
+
+      {/* Movie Grid */}
+      {/* <div className="px-4 py-9 md:px-16">
+        <h2 className="text-2xl font-semibold mb-6">Trending Now</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {movies.map((movie, index) => (
+            <MovieCard key={`${movie._id}-${index}`} {...movie} />
+          ))}
+        </div>
+      </div> */}
     </div>
   );
 }

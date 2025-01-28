@@ -3,6 +3,7 @@ import express from "express";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
 import movieRoutes from "./routes/movies.js";
+import userRoutes from "./routes/user.js";
 import cors from "cors";
 
 const connurl = process.env.MONGO_URI;
@@ -20,6 +21,7 @@ app.use(express.json()); // Middleware used to use req.body so that we can send 
 // //Available Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
+app.use("/api/users", userRoutes);
 
 app.listen(port, () => {
   console.log(`MovieWebsite backend listening on port ${port}`);
