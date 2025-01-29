@@ -3,11 +3,13 @@ import Navbar from "../components/Navbar";
 import MovieCarousel from "../components/MovieCarousel";
 import { Play, Info } from "lucide-react";
 import MovieCard from "@/components/MovieCard";
+import Spinner from "@/components/Spinner";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const host = "http://localhost:5000/";
 
 export default function Index() {
-  const categories = ["Horror", "Action", "Thriller","Comedy","Romance"];
+  const categories = ["Horror", "Action", "Thriller", "Comedy", "Romance"];
 
   // Predefined list of movies with local image paths
   const localMovies = [
@@ -40,6 +42,12 @@ export default function Index() {
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
   const [latestMovies, setLatestMovies] = useState([]);
 
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [total_res, setTotal_res] = useState(0)
+  
+
+
   const featuredMovie = movies[currentMovieIndex] || {
     poster: "/placeholder.jpg",
     title: "Sample Movie",
@@ -47,14 +55,30 @@ export default function Index() {
     year: "2023",
   };
 
+  const fetchLatestMovies = async () => {
+    console.log("HI");
+    const [latest] = await Promise.all([
+      fetch(`${host}api/movies/latest?page=${page}`).then(res => res.json())
+    ]);
+
+    const updatedMovies = [...latestMovies, ...latest.movies].reduce((acc, movie) => {
+      if (!acc.some(m => m._id === movie._id)) {
+        acc.push(movie);
+      }
+      return acc;
+    }, []);
+
+    setLatestMovies(updatedMovies);
+    setTotal_res(latest.totalMovies);
+    setPage(page+1);
+    console.log(latest);
+
+    const x = await latestMovies.length;
+    console.log("Fetching LAtest Movies", x)
+  };
+
   useEffect(() => {
-    const fetchMovies = async () => {
-      const [latest] = await Promise.all([
-        fetch(`${host}api/movies/latest`).then(res => res.json())
-      ]);
-      setLatestMovies(latest);
-    };
-    fetchMovies();
+    fetchLatestMovies();
   }, []);
 
   const nextMovie = useCallback(() => {
@@ -67,10 +91,19 @@ export default function Index() {
 
   useEffect(() => {
     if (!isAutoplayPaused) {
-      const interval = setInterval(nextMovie, 8000);
+      const interval = setInterval(nextMovie, 5000);
       return () => clearInterval(interval);
     }
   }, [nextMovie, isAutoplayPaused]);
+
+  const fetchMoreMovies = async () => {
+    setLoading(true);
+    setPage(page+1);
+    fetchLatestMovies();
+    setLoading(false);
+  }
+
+
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -82,9 +115,8 @@ export default function Index() {
           <img
             src={featuredMovie.poster}
             alt={featuredMovie.title}
-            className={`h-full w-full object-cover transition-all duration-700 ${
-              isTransitioning ? "scale-105 brightness-50" : "scale-100"
-            }`}
+            className={`h-full w-full object-cover transition-all duration-700 ${isTransitioning ? "scale-105 brightness-50" : "scale-100"
+              }`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
@@ -130,22 +162,21 @@ export default function Index() {
       {/* Latest Movies */}
       <div className="px-4 py-9 md:px-16">
         <h2 className="text-2xl font-semibold mb-6">Latest Releases</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {latestMovies.map((movie) => (
-            <MovieCard key={movie._id} {...movie} />
-          ))}
-        </div>
-      </div>
 
-      {/* Movie Grid */}
-      {/* <div className="px-4 py-9 md:px-16">
-        <h2 className="text-2xl font-semibold mb-6">Trending Now</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {movies.map((movie, index) => (
-            <MovieCard key={`${movie._id}-${index}`} {...movie} />
-          ))}
-        </div>
-      </div> */}
+        <InfiniteScroll
+          dataLength={latestMovies.length}
+          next={fetchMoreMovies}
+          hasMore={latestMovies.length !== total_res}
+          loader={<Spinner />}
+        >
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {latestMovies.map((movie) => (
+              <MovieCard key={movie._id} {...movie} />
+            ))}
+          </div>
+        </InfiniteScroll>
+        {loading && <Spinner />}
+      </div>
     </div>
   );
 }

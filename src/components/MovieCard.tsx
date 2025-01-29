@@ -27,22 +27,22 @@ export default function MovieCard({
   const [isLiked, setIsLiked] = useState(false);
   const [isWatchLater, setIsWatchLater] = useState(false);
 
-  useEffect(() => {
-    const checkUserInteractions = async () => {
-      try {
-        const response = await fetch(`${host}api/users/preferences/${_id}`, {
-          credentials: 'include'
-        });
-        const data = await response.json();
-        setIsLiked(data.isLiked);
-        setIsWatchLater(data.isWatchLater);
-      } catch (error) {
-        console.error('Error fetching user preferences:', error);
-      }
-    };
+  // useEffect(() => {
+  //   const checkUserInteractions = async () => {
+  //     try {
+  //       const response = await fetch(`${host}api/users/preferences/${_id}`, {
+  //         credentials: 'include'
+  //       });
+  //       const data = await response.json();
+  //       setIsLiked(data.isLiked);
+  //       setIsWatchLater(data.isWatchLater);
+  //     } catch (error) {
+  //       console.error('Error fetching user preferences:', error);
+  //     }
+  //   };
 
-    checkUserInteractions();
-  }, [_id]);
+  //   checkUserInteractions();
+  // }, [_id]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault(); // Prevent navigation

@@ -37,6 +37,7 @@ export default function MovieCarousel({ category}: MovieCarouselProps) {
 
   useEffect(() => {
     fetchByCategory(category);
+    
   }, [])
   
 

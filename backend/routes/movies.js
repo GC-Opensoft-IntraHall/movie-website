@@ -201,14 +201,42 @@ router.get("/semantic-search", async (req, res) => {
   }
 });
 
+// router.get("/latest", async (req, res) => {
+//   try {
+//     const movies = await Movies.find().sort({ year: -1 }).limit(100);
+//     res.json(movies);
+//   } catch (error) {
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
 router.get("/latest", async (req, res) => {
   try {
-    const movies = await Movies.find().sort({ year: -1 }).limit(10);
-    res.json(movies);
+    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    const pageSize = parseInt(req.query.pageSize) || 10; // Default page size is 10
+
+    // Calculate the number of documents to skip
+    const skip = (page - 1) * pageSize;
+
+    // Fetch the movies with sorting, skipping, and limiting
+    const movies = await Movies.find()
+      .sort({ year: -1 }) // Sort by year in descending order
+      .skip(skip)
+      .limit(pageSize)
+
+    // Count total documents for metadata
+    const totalMovies = await Movies.countDocuments();
+
+    res.json({
+      movies,
+      currentPage: page,
+      totalPages: Math.ceil(totalMovies / pageSize),
+      totalMovies,
+    });
   } catch (error) {
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 //ROUTE 5:Search Movies by Id
 router.get("/:id", async (req, res) => {
