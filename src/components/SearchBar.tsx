@@ -117,9 +117,9 @@ export default function SearchBar({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20">
       <div 
-        ref={containerRef}
-        className="w-full max-w-2xl mx-4 bg-gray-900/95 rounded-xl shadow-2xl border border-white/10 overflow-hidden"
-      >
+  ref={containerRef}
+  className="w-full max-w-3xl mx-4 bg-gray-900/95 rounded-2xl shadow-2xl border border-white/10 overflow-hidden"
+>
         {/* Search Input */}
         <div className="flex items-center gap-3 p-4 border-b border-white/10">
           <Search className="h-5 w-5 text-gray-400" />
