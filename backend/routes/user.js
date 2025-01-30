@@ -28,6 +28,36 @@ router.post("/watchlater/:movieId",authMiddleWare, async (req, res) => {
   }
 });
 
+router.post("/watchlater-rm/:movieId", authMiddleWare, async (req, res) => {
+  try {
+    const userId = req.userId; // Assuming you have user auth middleware
+    const movieId = req.params.movieId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Find the index of the movie in the watchLater array
+    const movieIndex = user.watchLater.findIndex(
+      (item) => item.movieId.toString() === movieId
+    );
+
+    if (movieIndex === -1) {
+      return res.status(404).json({ error: "Movie not found in watch later list" });
+    }
+
+    // Remove the movie from the watchLater array
+    user.watchLater.splice(movieIndex, 1);
+    await user.save();
+
+    res.json({ success: true, message: "Movie removed from watch later" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // Like a movie
 router.post("/like/:movieId", authMiddleWare, async (req, res) => {
   try {
@@ -51,6 +81,37 @@ router.post("/like/:movieId", authMiddleWare, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.post("/like-rm/:movieId", authMiddleWare, async (req, res) => {
+  try {
+    const userId = req.userId; // Assuming you have user auth middleware
+    const movieId = req.params.movieId;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Find the index of the movie in the watchLater array
+    const movieIndex = user.likedMovies.findIndex(
+      (item) => item.movieId.toString() === movieId
+    );
+
+    if (movieIndex === -1) {
+      return res.status(404).json({ error: "Movie not found in Liked list" });
+    }
+
+    // Remove the movie from the watchLater array
+    user.likedMovies.splice(movieIndex, 1);
+    await user.save();
+
+    res.json({ success: true, message: "Movie removed from liked Movies" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+
+});
+
 
 // Get user's watch later list
 router.get("/watchlater", async (req, res) => {
