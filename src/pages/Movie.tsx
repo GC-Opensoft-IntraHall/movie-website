@@ -43,7 +43,7 @@ export default function Movie() {
       <Navbar /> {/* Navbar component */}
       <div className="pt-16">
         {/* Video player */}
-        <VideoPlayer videoSrc={movie.videoUrl || "/assets/video.mp4"} />
+        <VideoPlayer videoSrc={movie.videoUrl || "/assets/video3.mp4"} />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid md:grid-cols-[2fr,1fr] gap-8">
             <div>
