@@ -63,23 +63,16 @@ const UserMenu = () => {
         <DropdownMenuSeparator />
         
         <DropdownMenuItem asChild>
-          <Link to="/watchlist" className="flex items-center cursor-pointer">
+          <Link to="/my-movies?view=watchlater" className="flex items-center cursor-pointer">
             <Clock className="mr-2 h-4 w-4" />
             <span>Watchlist</span>
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
-          <Link to="/favorites" className="flex items-center cursor-pointer">
+          <Link to="/my-movies?view=liked" className="flex items-center cursor-pointer">
             <Heart className="mr-2 h-4 w-4" />
             <span>Favorites</span>
-          </Link>
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/ratings" className="flex items-center cursor-pointer">
-            <Star className="mr-2 h-4 w-4" />
-            <span>My Ratings</span>
           </Link>
         </DropdownMenuItem>
         

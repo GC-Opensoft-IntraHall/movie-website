@@ -10,6 +10,8 @@ import Search from "./pages/Search";
 import Movie from "./pages/Movie";
 import AuthCallback from "./pages/AuthCallback";
 
+import UserMovies from "./pages/UserMovies";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -24,6 +26,8 @@ const App = () => (
             <Route path="/search" element={<Search />} />
             <Route path="/movie/:id" element={<Movie />} />
             <Route path="/auth/success" element={<AuthCallback />} />
+            <Route path="/my-movies" element={<UserMovies />} />
+            
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
