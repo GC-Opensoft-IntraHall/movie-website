@@ -7,9 +7,9 @@ export default function Movie() {
   const host = "http://localhost:5000/"; // API base URL
   const { id } = useParams(); // Get the movie ID from URL
   const [movie, setMovie] = useState(null); // State for movie data
-  const [liked, setLiked] = useState(false); // State to manage liked status
+  const [liked, setLiked] = useState(true); // State to manage liked status
   const [rating, setRating] = useState<number>(0); // State for rating
-  const [watchLater, setWatchLater] = useState<boolean>(false); // State for "Watch Later"
+  const [watchLater, setWatchLater] = useState(true); // State for "Watch Later"
 
   // Fetch movie details when the component mounts or the movie ID changes
   useEffect(() => {
@@ -29,9 +29,10 @@ export default function Movie() {
   const handleLike = async () => {
     try {
       setLiked(!liked); // Toggle the like status immediately for UI responsiveness
-  
+      
       const token = localStorage.getItem("token"); // Retrieve the JWT token from storage
-  
+      
+      if(liked){
       const response = await fetch(`${host}api/users/like/${id}`, {
         method: "POST",
         headers: {
@@ -39,14 +40,31 @@ export default function Movie() {
           Authorization: `Bearer ${token}`, // Send token for authentication
         },
       });
-  
       const data = await response.json();
   
       if (!response.ok) {
         throw new Error(data.error || "Failed to add movie to Watch Later");
       }
-  
       console.log("Movie added to Liked Movies:", data);
+    }
+    else{
+      const response = await fetch(`${host}api/users/like-rm/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Send token for authentication
+        },
+      });
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to remove movie From Liked");
+      }
+      console.log("Movie removed from Liked Movies:", data);
+
+    }
+  
+     
     } catch (error) {
       console.error("Error adding to Liked Movies:", error.message);
       setLiked(!liked); // Revert state if request fails
@@ -58,27 +76,41 @@ export default function Movie() {
   const handleWatchLater = async() => {
     try {
       setWatchLater(!watchLater); // Toggle the like status immediately for UI responsiveness
-  
+
       const token = localStorage.getItem("token"); // Retrieve the JWT token from storage
-  
-      const response = await fetch(`${host}api/users/watchlater/${id}`, {
+      let response=null;
+      let data = null
+      if(watchLater){
+      response = await fetch(`${host}api/users/watchlater/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`, // Send token for authentication
         },
       });
-  
-      const data = await response.json();
-  
+      data = await response.json();
       if (!response.ok) {
         throw new Error(data.error || "Failed to add movie to Watch Later");
       }
-  
-      console.log("Movie added to Watch Later Movies:", data);
+      console.log("Movie added to Watch Later", data);
+    }
+    else{
+      response = await fetch(`${host}api/users/watchlater-rm/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Send token for authentication
+        },
+      });
+      data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to remove movie from Watch Later");
+      }
+      console.log("Movie removed from Watch Later", data);
+    }
     } catch (error) {
       console.error("Error adding to Watch Later:", error.message);
-      setLiked(!liked); // Revert state if request fails
+      // setWatchLater(!watchLater); // Revert state if request fails
     }
   };
 
@@ -108,16 +140,16 @@ export default function Movie() {
               {/* Like and Watch Later Buttons */}
               <div className="flex gap-12 items-center">
                 <button
-                  className={`flex items-center gap-2 ${liked ? "text-red-500" : ""}`}
+                  className={`flex items-center gap-2 ${!liked ? "text-red-500" : ""}`}
                   onClick={handleLike}
                 >
-                  <FaThumbsUp /> Like
+                  <FaThumbsUp /> {!liked ? "Liked" : "Like"}
                 </button>
                 <button
                   onClick={handleWatchLater}
-                  className={`flex items-center gap-2 ${watchLater ? "text-blue-500" : ""}`}
+                  className={`flex items-center gap-2 ${!watchLater ? "text-blue-500" : ""}`}
                 >
-                  Watch Later <FaPlus />
+                  {!watchLater ? "Added to Watch Later":"Add to Watch Later"} <FaPlus />
                 </button>
               </div>
 
