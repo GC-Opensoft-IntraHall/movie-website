@@ -49,13 +49,13 @@ export default function Navbar() {
               <SearchBar onClose={() => setIsSearchOpen(false)} />
             ) : (
               <button
-  onClick={() => setIsSearchOpen(true)}
-  className={`flex items-center gap-2 px-4 py-2 rounded-2xl border transition-all duration-300 w-80
-    ${isScrolled 
-      ? "bg-gray-900 border-gray-600 hover:bg-gray-800" 
-      : "bg-gray-900/20 border-gray-400 hover:bg-gray-900/30"
-    }`}
->
+                onClick={() => setIsSearchOpen(true)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300
+                  ${isScrolled 
+                    ? "bg-gray-900 border-gray-600 hover:bg-gray-800" 
+                    : "bg-gray-900/20 border-gray-400 hover:bg-gray-900/30"
+                  }`}
+              >
                 <Search className="h-5 w-5 text-gray-400" />
                 <span className="text-gray-400 text-sm hidden sm:inline">Search movies...</span>
               </button>
