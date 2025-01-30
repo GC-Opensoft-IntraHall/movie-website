@@ -5,6 +5,7 @@ import { Play, Info } from "lucide-react";
 import MovieCard from "@/components/MovieCard";
 import Spinner from "@/components/Spinner";
 import InfiniteScroll from "react-infinite-scroll-component";
+import MovieCardSkeleton from "@/components/MovieCardSkeleton";
 
 const host = "http://localhost:5000/";
 
@@ -18,21 +19,21 @@ export default function Index() {
       title: "Deadpool 2",
       year: "2023",
       poster: "https://images3.alphacoders.com/678/thumb-1920-678085.jpg", // Replace with your local image path
-      description: ""
+      description: "",
     },
     {
       id: "2",
       title: "Godzilla vs Kong",
       year: "2022",
       poster: "https://images5.alphacoders.com/135/thumb-1920-1355086.jpeg",
-      description: "Explosive action-packed adventure with iconic heroes."
+      description: "Explosive action-packed adventure with iconic heroes.",
     },
     {
       id: "3",
       title: "Captain America:Civil War",
       year: "2021",
       poster: "https://images5.alphacoders.com/689/thumb-1920-689398.jpg",
-      description: "A gripping thriller that will leave you breathless."
+      description: "A gripping thriller that will leave you breathless.",
     },
   ];
 
@@ -42,39 +43,49 @@ export default function Index() {
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
   const [latestMovies, setLatestMovies] = useState([]);
 
-  const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [total_res, setTotal_res] = useState(0)
-  
-
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total_res, setTotal_res] = useState(0);
 
   const featuredMovie = movies[currentMovieIndex] || {
     poster: "/placeholder.jpg",
     title: "Sample Movie",
-    description: "An epic adventure that will keep you on the edge of your seat.",
+    description:
+      "An epic adventure that will keep you on the edge of your seat.",
     year: "2023",
   };
+
+  const LoadingGrid = () => (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      {[...Array(5)].map((_, index) => (
+        <MovieCardSkeleton key={index} />
+      ))}
+    </div>
+  );
 
   const fetchLatestMovies = async () => {
     console.log("HI");
     const [latest] = await Promise.all([
-      fetch(`${host}api/movies/latest?page=${page}`).then(res => res.json())
+      fetch(`${host}api/movies/latest?page=${page}`).then((res) => res.json()),
     ]);
 
-    const updatedMovies = [...latestMovies, ...latest.movies].reduce((acc, movie) => {
-      if (!acc.some(m => m._id === movie._id)) {
-        acc.push(movie);
-      }
-      return acc;
-    }, []);
+    const updatedMovies = [...latestMovies, ...latest.movies].reduce(
+      (acc, movie) => {
+        if (!acc.some((m) => m._id === movie._id)) {
+          acc.push(movie);
+        }
+        return acc;
+      },
+      []
+    );
 
     setLatestMovies(updatedMovies);
     setTotal_res(latest.totalMovies);
-    setPage(page+1);
+    setPage(page + 1);
     console.log(latest);
 
     const x = await latestMovies.length;
-    console.log("Fetching LAtest Movies", x)
+    console.log("Fetching LAtest Movies", x);
   };
 
   useEffect(() => {
@@ -98,12 +109,10 @@ export default function Index() {
 
   const fetchMoreMovies = async () => {
     setLoading(true);
-    setPage(page+1);
+    setPage(page + 1);
     fetchLatestMovies();
     setLoading(false);
-  }
-
-
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -115,8 +124,9 @@ export default function Index() {
           <img
             src={featuredMovie.poster}
             alt={featuredMovie.title}
-            className={`h-full w-full object-cover transition-all duration-700 ${isTransitioning ? "scale-105 brightness-50" : "scale-100"
-              }`}
+            className={`h-full w-full object-cover transition-all duration-700 ${
+              isTransitioning ? "scale-105 brightness-50" : "scale-100"
+            }`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         </div>
@@ -162,22 +172,23 @@ export default function Index() {
       {/* Latest Movies */}
       <div className="px-4 py-9 md:px-16">
         <h2 className="text-2xl font-semibold mb-6">Latest Releases</h2>
-
-        <InfiniteScroll
-          dataLength={latestMovies.length}
-          next={fetchMoreMovies}
-          hasMore={latestMovies.length !== total_res}
-          loader={<Spinner />}
-        >
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {latestMovies.map((movie) => (
-              <MovieCard key={movie._id} {...movie} />
-            ))}
-          </div>
-        </InfiniteScroll>
-        {loading && <Spinner />}
+        {loading && latestMovies.length === 0 ? (
+          <LoadingGrid /> // Show Skeletons when loading and no movies yet
+        ) : (
+          <InfiniteScroll
+            dataLength={latestMovies.length}
+            next={fetchMoreMovies}
+            hasMore={latestMovies.length < total_res}
+            loader={<LoadingGrid />} // Show skeletons when more movies are loading
+          >
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {latestMovies.map((movie) => (
+                <MovieCard key={movie._id} {...movie} />
+              ))}
+            </div>
+          </InfiniteScroll>
+        )}
       </div>
     </div>
   );
 }
-

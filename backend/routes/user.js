@@ -1,9 +1,9 @@
 import express from "express";
 const router = express.Router();
 import User from "../models/User.js";
-import authMiddleWare from '../middleware/auth.js'
+import authMiddleWare from "../middleware/auth.js";
 
-router.post("/watchlater/:movieId",authMiddleWare, async (req, res) => {
+router.post("/watchlater/:movieId", authMiddleWare, async (req, res) => {
   try {
     const userId = req.userId; // Assuming you have user auth middleware
     const movieId = req.params.movieId;
@@ -53,9 +53,9 @@ router.post("/like/:movieId", authMiddleWare, async (req, res) => {
 });
 
 // Get user's watch later list
-router.get("/watchlater", async (req, res) => {
+router.get("/watchlater", authMiddleWare, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const user = await User.findById(userId).populate(
       "watchLater.movieId",
       "title poster year"
@@ -67,6 +67,18 @@ router.get("/watchlater", async (req, res) => {
   }
 });
 
+router.get("/liked", authMiddleWare, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const user = await User.findById(userId).populate(
+      "likedMovies.movieId",
+      "title poster year"
+    ); // Only fetch needed fields
 
+    res.json(user.likedMovies);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 export default router;

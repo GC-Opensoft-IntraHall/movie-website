@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import MovieCard from '../components/MovieCard';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import MovieCard from "../components/MovieCard";
 
 export default function UserMovies() {
   const [searchParams] = useSearchParams();
@@ -17,29 +17,27 @@ export default function UserMovies() {
     setError("");
 
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error("Please login to view your movies");
-      }
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please login to view your movies");
 
       const endpoint = view === "liked" ? "liked" : "watchlater";
-      const response = await fetch(`${host}api/movies/${endpoint}`, {
+      const response = await fetch(`${host}api/users/${endpoint}`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch movies");
-      }
+      if (!response.ok) throw new Error("Failed to fetch movies");
 
       const data = await response.json();
-      // Transform the data to match MovieCard props
-      const transformedMovies = data.map(item => ({
-        ...item.movieId, // Spread the movie details
-        addedAt: item.addedAt // Keep track of when it was added
+      console.log("Fetched movies:", data);
+
+      const transformedMovies = data.map((item) => ({
+        ...item.movieId,
+        _id: item.movieId._id, // Ensure movie ID is set correctly
+        addedAt: item.addedAt,
       }));
 
       setMovies(transformedMovies);
@@ -57,13 +55,13 @@ export default function UserMovies() {
 
   const handleRemove = async (movieId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const endpoint = view === "liked" ? "like" : "watchlater";
-      
-      const response = await fetch(`${host}api/movies/${endpoint}/${movieId}`, {
+
+      const response = await fetch(`${host}api/users/${endpoint}/${movieId}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -73,7 +71,7 @@ export default function UserMovies() {
       }
 
       // Remove movie from state
-      setMovies(movies.filter(movie => movie._id !== movieId));
+      setMovies(movies.filter((movie) => movie._id !== movieId));
     } catch (err) {
       console.error("Error removing movie:", err);
       setError(err.message);
@@ -91,28 +89,28 @@ export default function UserMovies() {
       <div className="pt-24 px-4 max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
-          
+
           {/* View Toggle */}
           <div className="flex gap-4">
             <button
-              onClick={() => window.location.search = "?view=watchlater"}
+              onClick={() => (window.location.search = "?view=watchlater")}
               className={`px-4 py-2 rounded-md ${
-                view === "watchlater" 
-                  ? "bg-primary text-black" 
+                view === "watchlater"
+                  ? "bg-primary text-black"
                   : "bg-secondary text-primary"
               }`}
             >
               Watch Later
             </button>
             <button
-              onClick={() => window.location.search = "?view=liked"}
+              onClick={() => (window.location.search = "?view=liked")}
               className={`px-4 py-2 rounded-md ${
-                view === "liked" 
-                  ? "bg-primary text-black" 
+                view === "liked"
+                  ? "bg-primary text-black"
                   : "bg-secondary text-primary"
               }`}
             >
-              Liked
+              Favorites
             </button>
           </div>
         </div>
@@ -124,7 +122,8 @@ export default function UserMovies() {
         ) : movies.length > 0 ? (
           <>
             <p className="text-muted-foreground mb-8">
-              {movies.length} {view === "liked" ? "liked" : "watch later"} movies
+              {movies.length} {view === "liked" ? "liked" : "watch later"}{" "}
+              movies
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {movies.map((movie) => (
