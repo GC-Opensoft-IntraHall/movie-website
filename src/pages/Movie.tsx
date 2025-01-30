@@ -6,7 +6,7 @@ import { FaThumbsUp, FaPlus, FaStar } from "react-icons/fa";
 export default function Movie() {
   const host = "http://localhost:5000/"; // API base URL
   const { id } = useParams(); // Get the movie ID from URL
-  const [movie, setMovie] = useState<any | null>(null); // State for movie data
+  const [movie, setMovie] = useState(null); // State for movie data
   const [liked, setLiked] = useState(false); // State to manage liked status
   const [rating, setRating] = useState<number>(0); // State for rating
   const [watchLater, setWatchLater] = useState<boolean>(false); // State for "Watch Later"
@@ -26,13 +26,60 @@ export default function Movie() {
   };
 
   // Handle like button click
-  const handleLike = () => {
-    setLiked(!liked); // Toggle the like status
+  const handleLike = async () => {
+    try {
+      setLiked(!liked); // Toggle the like status immediately for UI responsiveness
+  
+      const token = localStorage.getItem("token"); // Retrieve the JWT token from storage
+  
+      const response = await fetch(`${host}api/users/like/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Send token for authentication
+        },
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add movie to Watch Later");
+      }
+  
+      console.log("Movie added to Liked Movies:", data);
+    } catch (error) {
+      console.error("Error adding to Liked Movies:", error.message);
+      setLiked(!liked); // Revert state if request fails
+    }
   };
+  
 
   // Handle "Watch Later" button click
-  const handleWatchLater = () => {
-    setWatchLater(!watchLater); // Toggle the watch later status
+  const handleWatchLater = async() => {
+    try {
+      setWatchLater(!watchLater); // Toggle the like status immediately for UI responsiveness
+  
+      const token = localStorage.getItem("token"); // Retrieve the JWT token from storage
+  
+      const response = await fetch(`${host}api/users/watchlater/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Send token for authentication
+        },
+      });
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add movie to Watch Later");
+      }
+  
+      console.log("Movie added to Watch Later Movies:", data);
+    } catch (error) {
+      console.error("Error adding to Watch Later:", error.message);
+      setLiked(!liked); // Revert state if request fails
+    }
   };
 
   // Return nothing if movie data hasn't loaded

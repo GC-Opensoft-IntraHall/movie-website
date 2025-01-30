@@ -1,14 +1,17 @@
 import express from "express";
 const router = express.Router();
 import User from "../models/User.js";
+import authMiddleWare from '../middleware/auth.js'
 
-router.post("/watchlater/:movieId", async (req, res) => {
+router.post("/watchlater/:movieId",authMiddleWare, async (req, res) => {
   try {
-    const userId = req.user.id; // Assuming you have user auth middleware
+    const userId = req.userId; // Assuming you have user auth middleware
     const movieId = req.params.movieId;
 
     const user = await User.findById(userId);
-
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
     // Check if movie is already in watch later
     const exists = user.watchLater.some(
       (item) => item.movieId.toString() === movieId
@@ -26,9 +29,9 @@ router.post("/watchlater/:movieId", async (req, res) => {
 });
 
 // Like a movie
-router.post("/like/:movieId", async (req, res) => {
+router.post("/like/:movieId", authMiddleWare, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const movieId = req.params.movieId;
 
     const user = await User.findById(userId);
