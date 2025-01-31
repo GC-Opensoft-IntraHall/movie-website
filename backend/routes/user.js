@@ -112,7 +112,6 @@ router.post("/like-rm/:movieId", authMiddleWare, async (req, res) => {
 
 });
 
-
 // Get user's watch later list
 router.get("/watchlater", authMiddleWare, async (req, res) => {
   try {

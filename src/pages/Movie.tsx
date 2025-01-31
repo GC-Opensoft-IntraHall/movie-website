@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/use-toast";
 import videos from "../assets/videos.json";
+import { set } from "date-fns";
 
 export default function Movie() {
   const host = "http://localhost:5000/";
@@ -73,10 +74,61 @@ export default function Movie() {
         setIsLoading(false);
       }
     };
+    const token = localStorage.getItem("token");
 
-    loadMovieData();
+    const checkWatchLater = async () => {
+      try {
+        const response = await fetch(`${host}api/users/watchlater`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+    
+        if (!response.ok) throw new Error("Failed to fetch watch later list");
+    
+        const watchLaterMovies = await response.json();
+        console.log(watchLaterMovies);
+        // Find the index of the movieId
+        const index = watchLaterMovies.findIndex(movie => movie.movieId._id === id);
+        if(index == -1)setWatchLater(false);
+        else setWatchLater(true);
+    
+      } catch (error) {
+        console.error("Error checking watch later status:", error);
+      }
+    };
+
+const checkLiked = async () => {
+  try {
+    const response = await fetch(`${host}api/users/liked`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch liked list");
+
+    const likedMovies = await response.json();
+
+    // Find the index of the movieId
+    const index = likedMovies.findIndex(movie => movie.movieId._id === id);
+    if(index == -1)setLiked(false);
+    else setLiked(true);
+
+  } catch (error) {
+    console.error("Error checking liked list status:", error);
+  }
+};
+    loadMovieData();    
+    checkLiked();
+    checkWatchLater();
   }, [id]);
 
+  // ----------------------------------------------------------Handle Like & WatchLater---------------------------------------------------
   const handleLike = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -248,7 +300,7 @@ export default function Movie() {
                   ) : (
                     <Plus className="mr-2 h-4 w-4" />
                   )}
-                  {watchLater ? "Added" : "Watch Later"}
+                  {watchLater ? "Remove" : "Watch Later"}
                 </Button>
               </div>
             </div>
