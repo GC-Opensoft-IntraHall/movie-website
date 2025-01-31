@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Play, Info, Heart, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+
 
 const host = "http://localhost:5000/";
 
@@ -24,67 +26,35 @@ export default function MovieCard({
   genres = ["Action", "Drama"],
 }: MovieCardProps) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
   const [isLiked, setIsLiked] = useState(false);
   const [isWatchLater, setIsWatchLater] = useState(false);
-
-  // useEffect(() => {
-  //   const checkUserInteractions = async () => {
-  //     try {
-  //       const response = await fetch(`${host}api/users/preferences/${_id}`, {
-  //         credentials: 'include'
-  //       });
-  //       const data = await response.json();
-  //       setIsLiked(data.isLiked);
-  //       setIsWatchLater(data.isWatchLater);
-  //     } catch (error) {
-  //       console.error('Error fetching user preferences:', error);
-  //     }
-  //   };
-
-  //   checkUserInteractions();
-  // }, [_id]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
+    !!localStorage.getItem("token") // Assuming authentication token is stored in localStorage
+  );
 
   if (!poster) {
     return null;
   }
 
-  const handleLike = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
-    try {
-      const response = await fetch(`${host}api/users/like/${_id}`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (response.ok) {
-        setIsLiked(!isLiked);
-      }
-    } catch (error) {
-      console.error("Error updating like status:", error);
-    }
-  };
-
-  const handleWatchLater = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation
-    try {
-      const response = await fetch(`${host}api/users/watchlater/${_id}`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (response.ok) {
-        setIsWatchLater(!isWatchLater);
-      }
-    } catch (error) {
-      console.error("Error updating watch later status:", error);
-    }
-  };
   const handlePlayClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/movie/${_id}`);
+    if (isLoggedIn) {
+      navigate(`/movie/${_id}`);
+    } else {
+      toast({
+        title: "Alert",
+        description: "Please Login to View Movie Details!",
+        variant: "default",
+      });
+    }
   };
 
   return (
     <Link
-      to={`/movie/${_id}`}
+      to={isLoggedIn ? `/movie/${_id}` : "#"}
+      onClick={handlePlayClick}
       className="group relative block transition-transform duration-300 hover:scale-105"
     >
       <div className="relative overflow-hidden rounded-lg bg-gray-900">
@@ -140,26 +110,6 @@ export default function MovieCard({
                   className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-white/90"
                 >
                   <Play className="h-4 w-4" /> Play
-                </button>
-                <button
-                  onClick={handleLike}
-                  className={`rounded-full p-2 backdrop-blur-sm transition-colors hover:bg-white hover:text-black" ${
-                    isLiked
-                      ? "bg-red-500 text-white"
-                      : "bg-white/20 hover:bg-white/30"
-                  }`}
-                >
-                  <Heart className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={handleWatchLater}
-                  className={`rounded-full p-2 backdrop-blur-sm transition-colorshover:bg-white hover:text-black" ${
-                    isWatchLater
-                      ? "bg-green-500 text-white"
-                      : "bg-white/20 hover:bg-white/30"
-                  }`}
-                >
-                  <Plus className="h-4 w-4" />
                 </button>
               </div>
             </div>

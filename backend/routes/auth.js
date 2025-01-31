@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { google } from "googleapis"; // Import google from googleapis package
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
+
 
 const router = express.Router();
 
@@ -77,11 +79,12 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Email already in use." });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
-
+    const newUser = new User({ name, email, password: hashedPassword ,googleId:new mongoose.Types.ObjectId().toString() });
+    
     await newUser.save();
     res.json({ message: "User registered successfully." });
   } catch (error) {
+    console.log(error.message)
     res.status(500).json({ error: error.message });
   }
 });

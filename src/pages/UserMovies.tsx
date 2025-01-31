@@ -56,10 +56,10 @@ export default function UserMovies() {
   const handleRemove = async (movieId) => {
     try {
       const token = localStorage.getItem("token");
-      const endpoint = view === "liked" ? "like" : "watchlater";
+      const endpoint = view === "liked" ? "like-rm" : "watchlater-rm";
 
       const response = await fetch(`${host}api/users/${endpoint}/${movieId}`, {
-        method: "DELETE",
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
