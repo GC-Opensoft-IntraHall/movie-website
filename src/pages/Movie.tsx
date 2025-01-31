@@ -1,169 +1,310 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { FaThumbsUp, FaPlus, FaStar } from "react-icons/fa";
+import {
+  Heart,
+  Plus,
+  Minus,
+  Calendar,
+  Clock,
+  Eye,
+  User,
+  Star,
+  Film,
+  Languages,
+  Play,
+  Pause,
+  RotateCcw,
+  RotateCw,
+  VolumeX,
+  Volume2,
+  Maximize,
+  Minimize,
+  Settings,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/use-toast";
+import videos from "../assets/videos.json";
 
 export default function Movie() {
-  const host = "http://localhost:5000/"; // API base URL
-  const { id } = useParams(); // Get the movie ID from URL
-  const [movie, setMovie] = useState(null); // State for movie data
-  const [liked, setLiked] = useState(true); // State to manage liked status
-  const [rating, setRating] = useState<number>(0); // State for rating
-  const [watchLater, setWatchLater] = useState(true); // State for "Watch Later"
+  const host = "http://localhost:5000/";
+  const { id } = useParams();
+  const [movie, setMovie] = useState(null);
+  const [liked, setLiked] = useState(false);
+  const [watchLater, setWatchLater] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch movie details when the component mounts or the movie ID changes
+  // Function to get a random video from JSON
+  const getRandomVideo = () => {
+    const randomIndex = Math.floor(Math.random() * videos.length);
+    return videos[randomIndex];
+  };
+
   useEffect(() => {
-    fetchMovieDetails(id);
-    console.log(id); // Debugging: log the movie ID
+    const loadMovieData = async () => {
+      setIsLoading(true);
+      try {
+        // Get random video for playback
+        const randomVideo = getRandomVideo();
+
+        // Fetch movie metadata from backend
+        const response = await fetch(`${host}api/movies/${id}`);
+        const data = await response.json();
+
+        // Combine backend data with random video source
+        setMovie({
+          ...data,
+          videoUrl: randomVideo.videoUrl,
+          thumbnailUrl: randomVideo.thumbnailUrl,
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load movie details",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMovieData();
   }, [id]);
 
-  // Fetch movie details from the API
-  const fetchMovieDetails = async (movieId: string) => {
-    const response = await fetch(`${host}api/movies/${movieId}`);
-    const data = await response.json();
-    setMovie(data); // Set the fetched movie data
-    console.log(data); // Log the movie data for debugging
-  };
-
-  // Handle like button click
   const handleLike = async () => {
     try {
-      setLiked(!liked); // Toggle the like status immediately for UI responsiveness
-      
-      const token = localStorage.getItem("token"); // Retrieve the JWT token from storage
-      
-      if(liked){
-      const response = await fetch(`${host}api/users/like/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Send token for authentication
-        },
-      });
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to add movie to Watch Later");
-      }
-      console.log("Movie added to Liked Movies:", data);
-    }
-    else{
-      const response = await fetch(`${host}api/users/like-rm/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Send token for authentication
-        },
-      });
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to remove movie From Liked");
-      }
-      console.log("Movie removed from Liked Movies:", data);
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${host}api/users/${liked ? "like-rm" : "like"}/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    }
-  
-     
+      if (!response.ok) throw new Error("Failed to update like status");
+
+      setLiked(!liked);
+      toast({
+        title: liked ? "Removed from liked" : "Added to liked",
+        description: liked
+          ? "Movie removed from your liked list"
+          : "Movie added to your liked list",
+      });
     } catch (error) {
-      console.error("Error adding to Liked Movies:", error.message);
-      setLiked(!liked); // Revert state if request fails
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
-  
 
-  // Handle "Watch Later" button click
-  const handleWatchLater = async() => {
+  const handleWatchLater = async () => {
     try {
-      setWatchLater(!watchLater); // Toggle the like status immediately for UI responsiveness
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${host}api/users/${watchLater ? "watchlater-rm" : "watchlater"}/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const token = localStorage.getItem("token"); // Retrieve the JWT token from storage
-      let response=null;
-      let data = null
-      if(watchLater){
-      response = await fetch(`${host}api/users/watchlater/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Send token for authentication
-        },
+      if (!response.ok) throw new Error("Failed to update watch later status");
+
+      setWatchLater(!watchLater);
+      toast({
+        title: watchLater ? "Removed from Watch Later" : "Added to Watch Later",
+        description: watchLater
+          ? "Movie removed from watch later list"
+          : "Movie added to watch later list",
       });
-      data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to add movie to Watch Later");
-      }
-      console.log("Movie added to Watch Later", data);
-    }
-    else{
-      response = await fetch(`${host}api/users/watchlater-rm/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Send token for authentication
-        },
-      });
-      data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to remove movie from Watch Later");
-      }
-      console.log("Movie removed from Watch Later", data);
-    }
     } catch (error) {
-      console.error("Error adding to Watch Later:", error.message);
-      // setWatchLater(!watchLater); // Revert state if request fails
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
-  // Return nothing if movie data hasn't loaded
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="pt-16">
+          <Skeleton className="w-full aspect-video" />
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="grid md:grid-cols-[2fr,1fr] gap-8">
+              <div>
+                <Skeleton className="h-10 w-3/4 mb-4" />
+                <Skeleton className="h-4 w-1/4 mb-6" />
+                <Skeleton className="h-24 w-full mb-6" />
+                <div className="flex gap-4">
+                  <Skeleton className="h-10 w-32" />
+                  <Skeleton className="h-10 w-32" />
+                </div>
+              </div>
+              <div>
+                <Skeleton className="h-8 w-1/2 mb-4" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-full mb-2" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!movie) return null;
 
   return (
-    <div className="min-h-screen">
-      <Navbar /> {/* Navbar component */}
+    <div className="min-h-screen bg-background">
+      <Navbar />
       <div className="pt-16">
-        {/* Video player */}
-        <VideoPlayer videoSrc={movie.videoUrl || "/assets/video3.mp4"} />
+        <div className="relative">
+          <VideoPlayer
+            videoSrc={movie.videoUrl}
+            thumbnailUrl={movie.thumbnailUrl}
+          />
+        </div>
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid md:grid-cols-[2fr,1fr] gap-8">
             <div>
-              {/* Movie Title */}
-              <h1 className="text-4xl font-bold mb-4">{movie.title}</h1>
-              {/* Movie Plot */}
-              <div className="flex gap-4 text-ml text-muted-foreground mb-6">{movie.plot}</div>
-              <div className="flex gap-4 text-sm text-muted-foreground mb-6">
-                <span>{movie.year}</span>
-                <span>{movie.category}</span>
-              </div>
-              {/* Movie Description */}
-              <p className="text-lg mb-6">{movie.description}</p>
+              <h1 className="text-4xl font-bold mb-4 text-foreground">
+                {movie.title}
+              </h1>
 
-              {/* Like and Watch Later Buttons */}
-              <div className="flex gap-12 items-center">
-                <button
-                  className={`flex items-center gap-2 ${!liked ? "text-red-500" : ""}`}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {movie.genres && (
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    {movie.genres}
+                  </Badge>
+                )}
+                {movie.imdb.rating && (
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    <Star className="w-3 h-3" /> {movie.imdb.rating} IMDB
+                  </Badge>
+                )}
+                {movie.year && (
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    <Calendar className="w-3 h-3" /> {movie.year}
+                  </Badge>
+                )}
+              </div>
+
+              <Card className="mb-6">
+                <CardContent className="pt-6">
+                  <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {movie.fullplot}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <div className="flex gap-4">
+                <Button
+                  variant={liked ? "default" : "outline"}
+                  size="lg"
                   onClick={handleLike}
+                  className="w-40 transition-all"
                 >
-                  <FaThumbsUp /> {!liked ? "Liked" : "Like"}
-                </button>
-                <button
+                  <Heart
+                    className={`mr-2 h-4 w-4 ${liked ? "fill-current" : ""}`}
+                  />
+                  {liked ? "Liked" : "Like"}
+                </Button>
+
+                <Button
+                  variant={watchLater ? "default" : "outline"}
+                  size="lg"
                   onClick={handleWatchLater}
-                  className={`flex items-center gap-2 ${!watchLater ? "text-blue-500" : ""}`}
+                  className="w-40 transition-all"
                 >
-                  {!watchLater ? "Added to Watch Later":"Add to Watch Later"} <FaPlus />
-                </button>
-              </div>
-
-              
-            </div>
-
-            {/* Movie Info */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Movie Info</h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="text-muted-foreground">Genre: </span>{movie.category}</p>
-                <p><span className="text-muted-foreground">Release Year: </span>{movie.year}</p>
+                  {watchLater ? (
+                    <Minus className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Plus className="mr-2 h-4 w-4" />
+                  )}
+                  {watchLater ? "Added" : "Watch Later"}
+                </Button>
               </div>
             </div>
+
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="text-lg font-semibold mb-4">Movie Info</h3>
+                <div className="space-y-3">
+                  {movie.year && (
+                    <div className="flex items-center text-sm">
+                      <Calendar className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span className="text-muted-foreground mr-2">
+                        Released on:
+                      </span>
+                      <span className="font-medium">{movie.year}</span>
+                    </div>
+                  )}
+                  {movie.genres && (
+                    <div className="flex items-center text-sm">
+                      <Film className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span className="text-muted-foreground mr-2">
+                        Categories:
+                      </span>
+                      <span className="font-medium">{movie.genres}</span>
+                    </div>
+                  )}
+                  {movie.languages && (
+                    <div className="flex items-center text-sm">
+                      <Languages className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span className="text-muted-foreground mr-2">
+                        Languages:
+                      </span>
+                      <span className="font-medium">{movie.languages}</span>
+                    </div>
+                  )}
+                  {movie.directors && (
+                    <div className="flex items-center text-sm">
+                      <User className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span className="text-muted-foreground mr-2">
+                        Directors:
+                      </span>
+                      <span className="font-medium">{movie.directors}</span>
+                    </div>
+                  )}
+                  {movie.imdb && (
+                    <div className="flex items-center text-sm">
+                      <Star className="w-4 h-4 mr-2 text-muted-foreground" />
+                      <span className="text-muted-foreground mr-2">
+                        Ratings:
+                      </span>
+                      <span className="font-medium">{movie.imdb.rating}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -171,52 +312,247 @@ export default function Movie() {
   );
 }
 
-// VideoPlayer component to handle video and skip functionality
-interface VideoPlayerProps {
-  videoSrc: string; // Video source URL
-}
+const VideoPlayer = ({ videoSrc, thumbnailUrl }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState("0:00");
+  const [duration, setDuration] = useState("0:00");
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [showCentralPlay, setShowCentralPlay] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoSrc }) => {
-  const videoRef = useRef<HTMLVideoElement>(null); // Reference to the video element
-  const skipDuration = 5; // Amount to skip forward or backward in seconds
+  const skipDuration = 5;
 
-  // Function to skip video forward or backward by 5 seconds
-  const skipVideo = (direction: "forward" | "backward") => {
+  const formatTime = (time) => {
+    if (isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const updateProgress = () => {
+      setProgress((video.currentTime / video.duration) * 100);
+      setCurrentTime(formatTime(video.currentTime));
+      setDuration(formatTime(video.duration));
+    };
+
+    video.addEventListener("timeupdate", updateProgress);
+    video.addEventListener("loadedmetadata", () =>
+      setDuration(formatTime(video.duration))
+    );
+
+    return () => {
+      video.removeEventListener("timeupdate", updateProgress);
+    };
+  }, []);
+
+  const togglePlay = () => {
     if (videoRef.current) {
-      // Calculate new time by adding or subtracting 5 seconds
-      let newTime = videoRef.current.currentTime + (direction === "forward" ? skipDuration : -skipDuration);
-
-      // Ensure current time doesn't go below 0 or exceed video duration
-      if (newTime < 0) newTime = 0;
-      if (newTime > videoRef.current.duration) newTime = videoRef.current.duration;
-
-      videoRef.current.currentTime = newTime; // Set the new time
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsPlaying(true);
+        setShowCentralPlay(true); // Show play/pause animation
+        setTimeout(() => setShowCentralPlay(false), 500);
+      } else {
+        videoRef.current.pause();
+        setIsPlaying(false);
+        setShowCentralPlay(true); // Show play/pause animation
+        setTimeout(() => setShowCentralPlay(false), 500);
+      }
     }
   };
 
+  const skipVideo = (direction) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime +=
+        direction === "forward" ? skipDuration : -skipDuration;
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (videoRef.current) {
+      if (!document.fullscreenElement) {
+        videoRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
+
+  const handleProgressClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percent = clickX / rect.width;
+    if (videoRef.current) {
+      videoRef.current.currentTime = percent * videoRef.current.duration;
+    }
+  };
+
+  const handlePlaybackRateChange = () => {
+    if (videoRef.current) {
+      const newRate = playbackRate === 2 ? 0.5 : playbackRate + 0.5;
+      videoRef.current.playbackRate = newRate;
+      setPlaybackRate(newRate);
+    }
+  };
+
+  // 🎮 Add Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      switch (e.code) {
+        case "Space":
+          e.preventDefault();
+          togglePlay();
+          break;
+        case "ArrowRight":
+          skipVideo("forward");
+          break;
+        case "ArrowLeft":
+          skipVideo("backward");
+          break;
+        case "KeyM":
+          toggleMute();
+          break;
+        case "KeyF":
+          toggleFullscreen();
+          break;
+        case "KeyP":
+          handlePlaybackRateChange();
+          break;
+        default:
+          break;
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [playbackRate]);
+
   return (
-    <div className="relative aspect-video bg-black">
+    <div
+      className="relative aspect-video bg-black"
+      onDoubleClick={toggleFullscreen}
+    >
+      {/* 🎬 Video Element */}
       <video
         ref={videoRef}
         className="w-full h-full object-cover"
-        controls
-        onClick={(e) => {
-          e.stopPropagation(); // Prevent event from propagating
-          const rect = e.currentTarget.getBoundingClientRect(); // Get the position of the video element
-          const clickX = e.clientX - rect.left; // Get the horizontal position of the click
-          const videoWidth = rect.width; // Get the video width
-          
-          // Skip the video based on where the user clicked
-          if (clickX < videoWidth / 10) { // Left side: skip backward
-            skipVideo("backward");
-          } else if (clickX > videoWidth * 0.9) { // Right side: skip forward
-            skipVideo("forward");
-          }
-        }}
+        controls={false}
+        poster={thumbnailUrl}
+        onClick={togglePlay}
       >
         <source src={videoSrc} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
+
+      {/* 🎛️ Central Play/Pause Animation */}
+      {showCentralPlay && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="bg-black/50 p-6 rounded-full animate-ping">
+            {isPlaying ? (
+              <Pause className="w-12 h-12 text-white" />
+            ) : (
+              <Play className="w-12 h-12 text-white" />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 🎛️ Custom Controls */}
+      <div
+        className={`absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black via-black/50 to-transparent ${
+          controlsVisible ? "opacity-100" : "opacity-0"
+        } transition-opacity duration-300`}
+      >
+        {/* Progress Bar */}
+        <div
+          className="h-2 bg-gray-700 rounded-full cursor-pointer"
+          onClick={handleProgressClick}
+        >
+          <div
+            className="h-full bg-red-500 rounded-full"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        <div className="flex justify-between items-center mt-2 text-white">
+          {/* Playback Controls */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={togglePlay}
+              className="p-2 hover:bg-gray-800 rounded"
+            >
+              {isPlaying ? (
+                <Pause className="w-6 h-6" />
+              ) : (
+                <Play className="w-6 h-6" />
+              )}
+            </button>
+            <button
+              onClick={() => skipVideo("backward")}
+              className="p-2 hover:bg-gray-800 rounded"
+            >
+              <RotateCcw className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => skipVideo("forward")}
+              className="p-2 hover:bg-gray-800 rounded"
+            >
+              <RotateCw className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Time Display */}
+          <span className="text-sm">
+            {currentTime} / {duration}
+          </span>
+
+          {/* Additional Controls */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handlePlaybackRateChange}
+              className="p-2 hover:bg-gray-800 rounded"
+            >
+              {playbackRate}x
+            </button>
+            <button
+              onClick={toggleMute}
+              className="p-2 hover:bg-gray-800 rounded"
+            >
+              {isMuted ? (
+                <VolumeX className="w-6 h-6" />
+              ) : (
+                <Volume2 className="w-6 h-6" />
+              )}
+            </button>
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 hover:bg-gray-800 rounded"
+            >
+              {isFullscreen ? (
+                <Minimize className="w-6 h-6" />
+              ) : (
+                <Maximize className="w-6 h-6" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

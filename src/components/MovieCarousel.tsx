@@ -12,35 +12,29 @@ interface MovieCarouselProps {
   }>;
 }
 
-export default function MovieCarousel({ category}: MovieCarouselProps) {
+export default function MovieCarousel({ category }: MovieCarouselProps) {
   const host = "http://localhost:5000/";
   const [movies, setMovies] = useState([]);
 
   const fetchByCategory = async (category) => {
-    const response = await fetch(
-      `${host}api/movies/category?t=${category}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // "auth-token": localStorage.getItem('token')
-        },
-      }
-    );
+    const response = await fetch(`${host}api/movies/category?t=${category}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // "auth-token": localStorage.getItem('token')
+      },
+    });
     const json = await response.json(); //Parsing the json
     const validMovies = json.filter(
-      (movie) => movie.poster && movie.poster !== "N/A" && movie.poster.endsWith(".jpg")
+      (movie) =>
+        movie.poster && movie.poster !== "N/A" && movie.poster.endsWith(".jpg")
     );
-    console.log(validMovies);
     setMovies(validMovies);
   };
 
   useEffect(() => {
     fetchByCategory(category);
-    
-  }, [])
-  
-
+  }, []);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +56,7 @@ export default function MovieCarousel({ category}: MovieCarouselProps) {
   return (
     <div className="relative py-8">
       <h2 className="text-2xl font-semibold mb-4 px-4">{category}</h2>
-      
+
       <div className="group relative">
         <button
           onClick={() => scroll("left")}
