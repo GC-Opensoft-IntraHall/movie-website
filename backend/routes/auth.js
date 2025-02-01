@@ -6,12 +6,14 @@ import { google } from "googleapis"; // Import google from googleapis package
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
 
+const client= PROCESS.env.CLIENT_URL;
+const host= PROCESS.env.API_URL;
 
 const router = express.Router();
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = "http://localhost:5000/api/auth/google/callback";
+const REDIRECT_URI = `${host}api/auth/google/callback`;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
@@ -60,10 +62,10 @@ router.get("/google/callback", async (req, res) => {
     );
 
     // Redirect to frontend with token
-    res.redirect(`http://localhost:8080/auth/success?token=${token}`);
+    res.redirect(`${client}auth/success?token=${token}`);
   } catch (error) {
     console.error("OAuth callback error:", error);
-    res.redirect("http://localhost:8080/auth/error");
+    res.redirect(`${client}auth/error`);
   }
 });
 
