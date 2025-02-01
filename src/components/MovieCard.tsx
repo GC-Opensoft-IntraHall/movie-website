@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 
-const host = "http://localhost:5000/";
+const host = import.meta.env.VITE_API_URL;
 
 interface MovieCardProps {
   _id: string;

@@ -13,7 +13,7 @@ interface MovieCarouselProps {
 }
 
 export default function MovieCarousel({ category }: MovieCarouselProps) {
-  const host = "http://localhost:5000/";
+  const host = import.meta.env.VITE_API_URL;
   const [movies, setMovies] = useState([]);
 
   const fetchByCategory = async (category) => {

@@ -11,8 +11,8 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const host = "http://localhost:5000/";
-
+  const host = import.meta.env.VITE_API_URL;
+  
   const handleMovieName = async (query) => {
     if (!query) {
       setResults([]);

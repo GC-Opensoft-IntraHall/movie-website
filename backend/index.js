@@ -12,7 +12,7 @@ console.log(connurl);
 let conn = await mongoose.connect(connurl);
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000; // Use available port in deployment
 
 // Add this to handle OPTIONS requests for CORS preflight
 app.use(cors());

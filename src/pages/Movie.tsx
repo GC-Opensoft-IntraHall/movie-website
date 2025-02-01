@@ -34,7 +34,7 @@ import videos from "../assets/videos.json";
 import { set } from "date-fns";
 
 export default function Movie() {
-  const host = "http://localhost:5000/";
+  const host = import.meta.env.VITE_API_URL;
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [liked, setLiked] = useState(false);

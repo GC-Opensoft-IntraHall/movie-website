@@ -13,7 +13,7 @@ interface SearchResult {
 
 export default function SearchBar({ onClose }: { onClose: () => void }) {
 
-  const host = "http://localhost:5000/";
+  const host = import.meta.env.VITE_API_URL;
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
